@@ -1,90 +1,184 @@
-(workflow)
-1.  User uploads file from React frontend → raw image
-2.  Send the file to backend (/api/files)
-3.  Backend uses Jimp to preprocess image: grayscale, normalize, etc.
-4.  Backend runs Tesseract (or sends preprocessed file back)
-5.  Extracted text + original file info saved in MongoDB
-6.  Frontend receives OCR text → shows progress / lets you manipulate
 
-OCR Document Reader
-Description
+# OCR Document Reader
 
-Application web full-stack permettant de :
+## Description
 
-Télécharger des documents (images ou PDF)
+Full-stack web application for OCR document processing with intelligent image preprocessing. Users can upload images or PDFs, extract text using Tesseract.js, and manage documents through a minimalist futuristic interface.
 
-Extraire le texte avec OCR (Tesseract.js)
+## Core Workflow
 
-Prétraiter les images pour améliorer la précision (Jimp)
+1. User uploads file from React frontend → raw image
+2. File sent to backend (/api/files) via Axios
+3. Backend processes image with Jimp:
+   - Grayscale conversion
+   - Normalization
+   - Contrast adjustment
+   - Adaptive thresholding
+4. Tesseract.js extracts text from preprocessed image
+5. Extracted text + original file metadata saved to MongoDB
+6. Frontend displays OCR results with real-time progress tracking
+7. Text manipulation and export tools available
 
-Nommer les fichiers et télécharger le texte avec ce nom
+## Features
 
-Stocker les textes et métadonnées dans MongoDB
+### Document Processing
+- Drag-and-drop file upload interface
+- Support for images (PNG, JPG, JPEG) and PDFs
+- Custom document naming system
+- Automatic image preprocessing pipeline
+- High-accuracy OCR with Tesseract.js
 
-L’interface est minimaliste et futuriste avec Tailwind CSS.
+### Text Management
+- Real-time OCR progress indicator
+- Extracted text display with editing capabilities
+- Download text as .txt file with custom filename
+- Text manipulation tools (case conversion, trim, find/replace)
 
-Fonctionnalités
+### Data Persistence
+- MongoDB storage for:
+  - Original filename and custom document name
+  - Extracted text content
+  - Upload timestamp
+  - File metadata
+- Document history and retrieval
 
-Upload de fichiers avec nom personnalisé
+## Technology Stack
 
-Prétraitement des images (greyscale, contraste, normalisation)
+### Frontend
+- React.js with functional components and hooks
+- Tailwind CSS for futuristic UI design
+- Axios for API communication
+- React Dropzone for file uploads
 
-OCR précis avec Tesseract.js
+### Backend
+- Node.js with Express framework
+- Multer for file upload handling
+- Jimp for image preprocessing
+- Tesseract.js for OCR engine
+- MongoDB with Mongoose ODM
 
-Stockage dans MongoDB (texte + nom + date)
+## Installation
 
-Téléchargement du texte en .txt avec nom personnalisé
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB instance (local or Atlas)
+- npm or yarn package manager
 
-Édition du texte via outils intégrés
+### Frontend Setup
+1. Navigate to frontend directory:
+   cd ai-frontend
 
-Technologies
+2. Install dependencies:
+   npm install
 
-Frontend: React.js, Tailwind CSS, Axios
-Backend: Node.js, Express, Multer, Jimp, Tesseract.js, MongoDB (Mongoose)
+3. Start development server:
+   npm run dev
 
-Installation
-Frontend
-cd ai-frontend
-npm install
-npm run dev
+Frontend runs on http://localhost:5173
 
-Backend
-cd ai-backend
-npm install
-# Crée un fichier .env avec :
-# MONGO_URI=your_mongodb_connection_string
-# PORT=5000
-nodemon server.js
+### Backend Setup
+1. Navigate to backend directory:
+   cd ai-backend
 
-Structure du projet
+2. Install dependencies:
+   npm install
+
+3. Create .env file in root directory:
+   MONGO_URI=your_mongodb_connection_string_here
+   PORT=5000
+
+4. Start server:
+   nodemon server.js
+
+Backend runs on http://localhost:5000
+
+## Project Structure
+
 ai-frontend/
- └─ src/
-     ├─ components/  # FileUploader, OCRDisplay, ManipulationTools
-     └─ pages/       # OCRPage, Agent, Invoice, Dashboard
+├── src/
+│   ├── components/
+│   │   ├── FileUploader.jsx      # Drag-drop upload with preview
+│   │   ├── OCRDisplay.jsx        # Extracted text viewer
+│   │   └── ManipulationTools.jsx # Text editing utilities
+│   ├── pages/
+│   │   ├── OCRPage.jsx          # Main OCR interface
+│   │   ├── Agent.jsx            # Document agent view
+│   │   ├── Invoice.jsx          # Invoice processing
+│   │   └── Dashboard.jsx        # Document dashboard
+│   ├── services/
+│   │   └── api.js              # Axios configuration
+│   └── App.jsx                 # Root component
 
 ai-backend/
- ├─ controllers/    # fileController.js
- ├─ models/         # File.js
- ├─ routes/         # fileUpload.js
- ├─ uploads/        # fichiers uploadés
- └─ server.js
+├── controllers/
+│   └── fileController.js       # OCR and preprocessing logic
+├── models/
+│   └── File.js                # MongoDB schema
+├── routes/
+│   └── fileUpload.js          # API endpoints
+├── uploads/                   # Temporary file storage
+├── utils/
+│   └── imageProcessor.js      # Jimp preprocessing functions
+└── server.js                 # Express application entry
 
-Usage
+## Usage Guide
 
-Saisir un nom pour le document
+1. Launch both frontend and backend servers
+2. Navigate to OCR page
+3. Enter a custom name for your document
+4. Drag and drop or click to select an image/PDF
+5. Monitor OCR progress in real-time
+6. Review and edit extracted text
+7. Download text file with your chosen filename
+8. Access previously processed documents from Dashboard
 
-Télécharger l’image ou le PDF
+## API Endpoints
 
-OCR automatique → texte affiché à l’écran
+POST /api/files/upload
+- Accepts multipart/form-data with file and documentName
+- Returns OCR text and document metadata
 
-Télécharger le texte avec le nom choisi
+GET /api/files
+- Retrieves all processed documents
+- Returns array of documents with metadata
 
-Futur
+GET /api/files/:id
+- Retrieves specific document by ID
 
-Export PDF du texte OCR
+DELETE /api/files/:id
+- Removes document from database
 
-Dashboard avec tous les documents
+## Image Preprocessing Pipeline
 
-Recherche et filtrage sur le texte
+The backend implements multi-stage image enhancement:
 
-Amélioration de l’OCR (binarisation, redimensionnement, seuil adaptatif)
+1. Grayscale conversion for optimal OCR
+2. Normalization to standardize brightness
+3. Contrast adjustment for text sharpness
+4. Adaptive thresholding for varied lighting
+5. Noise reduction using median filter
+6. Deskewing for rotated documents
+
+## Performance Optimizations
+
+- Client-side file validation before upload
+- Streaming file processing for large documents
+- MongoDB indexing on frequently queried fields
+- Debounced text editing to reduce re-renders
+- Lazy loading for document dashboard
+
+## Future Enhancements
+
+- PDF text export functionality
+- Advanced document dashboard with search and filters
+- Full-text search across all documents
+- Multi-language OCR support
+- Batch document processing
+- User authentication and document ownership
+- Cloud storage integration (AWS S3, Google Cloud)
+- OCR confidence scoring and manual correction tools
+
+
+
+---
+
